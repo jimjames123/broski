@@ -239,7 +239,9 @@ export const ClosingSegment: React.FC<{ lenFrames: number }> = ({
   const acc = beatSeq(CLOSING.smartLineAccent, s);
   const bumperFrom = sec(CLOSING.bumperName.start) - sec(s);
   const bumperDur = lenFrames - bumperFrom;
-  const tag = beatSeq(CLOSING.bumperTag, s);
+  // tagline timing is relative to the BUMPER sequence start (not the segment)
+  const tagFromInBumper =
+    sec(CLOSING.bumperTag.start) - sec(CLOSING.bumperName.start);
 
   return (
     <AbsoluteFill style={{ opacity: fadeEdges(frame, lenFrames, 0) }}>
@@ -287,7 +289,7 @@ export const ClosingSegment: React.FC<{ lenFrames: number }> = ({
           }}
         >
           <LogoReveal logoWidth={640} panelWidth={780} panelHeight={320} />
-          <BumperText tagFrom={tag.from} />
+          <BumperText tagFrom={tagFromInBumper} />
         </AbsoluteFill>
       </Sequence>
     </AbsoluteFill>
