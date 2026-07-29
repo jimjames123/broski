@@ -17,13 +17,15 @@ export const PhoneMockup: React.FC<{
   width: number;
   src: string;
   lifeFrames: number; // how long this mockup is on screen (its Sequence length)
-}> = ({ width, src, lifeFrames }) => {
+  startSec?: number; // trim the recording start
+  playbackRate?: number;
+}> = ({ width, src, lifeFrames, startSec = 0, playbackRate = 1 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const durationInFrames = lifeFrames;
 
-  // recording is a portrait phone capture (298x640)
-  const screenAspect = 640 / 298;
+  // recording is a portrait phone capture (1320x2868)
+  const screenAspect = 2868 / 1320;
   const bezel = width * 0.028;
   const radius = width * 0.13;
   const screenW = width - bezel * 2;
@@ -97,6 +99,8 @@ export const PhoneMockup: React.FC<{
             <OffthreadVideo
               src={src}
               muted
+              trimBefore={Math.round(startSec * fps)}
+              playbackRate={playbackRate}
               style={{
                 width: "100%",
                 height: "100%",

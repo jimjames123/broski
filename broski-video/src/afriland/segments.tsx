@@ -12,7 +12,26 @@ import { OPENING_BEATS, DEMO_CAPTIONS, CLOSING, type Beat } from "./copy";
 import { KineticText } from "./KineticText";
 import { PhoneMockup } from "./PhoneMockup";
 import { LogoReveal } from "./LogoReveal";
-import { EASE_OUT } from "./motion";
+import { PatternBand, PatternMotif, PatternStrip } from "./Patterns";
+import { EASE_OUT, SPRINGS, springAt } from "./motion";
+import { useVideoConfig } from "remotion";
+
+// A decorative motif band that draws out from the centre with a spring.
+const RevealBand: React.FC<{
+  width: number;
+  height: number;
+  delay?: number;
+  opacity?: number;
+}> = ({ width, height, delay = 0, opacity = 0.6 }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const p = springAt(frame, fps, delay, SPRINGS.soft);
+  return (
+    <div style={{ width, height, transform: `scaleX(${p})`, transformOrigin: "center" }}>
+      <PatternBand width="100%" height={height} opacity={opacity * p} />
+    </div>
+  );
+};
 
 // Wrap a beat in a Sequence local to its segment. `hold` extends it to a fixed
 // end frame (for building lists); otherwise it lasts the beat's own length.
@@ -61,6 +80,21 @@ export const OpeningSegment: React.FC<{ lenFrames: number }> = ({
         padding: "0 120px",
       }}
     >
+      {/* cultural accents */}
+      <div style={{ position: "absolute", top: 150, left: 120, right: 120 }}>
+        <RevealBand width={840} height={30} delay={2} opacity={0.55} />
+      </div>
+      <PatternMotif
+        src="head_pattern.png"
+        width={330}
+        opacity={0.14}
+        style={{
+          position: "absolute",
+          right: 60,
+          top: 620,
+          filter: "invert(1) grayscale(1) brightness(1.15)",
+        }}
+      />
       <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
         {(() => {
           const b = beatSeq(eyebrow, s, lenFrames);
@@ -136,9 +170,13 @@ export const LogoRevealSegment: React.FC<{ lenFrames: number }> = ({
         opacity: fadeEdges(frame, lenFrames, 18),
         justifyContent: "center",
         alignItems: "center",
+        flexDirection: "column",
+        gap: 46,
       }}
     >
+      <RevealBand width={620} height={28} delay={10} opacity={0.6} />
       <LogoReveal logoWidth={720} panelWidth={860} panelHeight={360} />
+      <RevealBand width={620} height={28} delay={14} opacity={0.6} />
     </AbsoluteFill>
   );
 };
@@ -152,6 +190,48 @@ export const DemoSegment: React.FC<{ lenFrames: number }> = ({ lenFrames }) => {
 
   return (
     <AbsoluteFill style={{ opacity: fadeEdges(frame, lenFrames, 18) }}>
+      {/* cultural motif framing around (never over) the recording */}
+      <AbsoluteFill style={{ alignItems: "center", justifyContent: "flex-start" }}>
+        <div style={{ marginTop: 118 }}>
+          <RevealBand width={780} height={30} delay={4} opacity={0.55} />
+        </div>
+      </AbsoluteFill>
+      <div
+        style={{
+          position: "absolute",
+          left: 44,
+          top: 560,
+          bottom: 300,
+          width: 46,
+          opacity: interpolate(frame, [10, 30], [0, 1], {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+          }),
+        }}
+      >
+        <DemoStrip />
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          right: 44,
+          top: 560,
+          bottom: 300,
+          width: 46,
+          opacity: interpolate(frame, [14, 34], [0, 1], {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+          }),
+        }}
+      >
+        <DemoStrip />
+      </div>
+      <AbsoluteFill style={{ alignItems: "center", justifyContent: "flex-end" }}>
+        <div style={{ marginBottom: 120 }}>
+          <RevealBand width={780} height={30} delay={8} opacity={0.5} />
+        </div>
+      </AbsoluteFill>
+
       {/* caption zone (upper area, above the phone) */}
       {DEMO_CAPTIONS.map((beat, i) => {
         const b = beatSeq(beat, s);
@@ -183,12 +263,18 @@ export const DemoSegment: React.FC<{ lenFrames: number }> = ({ lenFrames }) => {
             width={470}
             src={staticFile("afriland/screen_recording.mp4")}
             lifeFrames={lenFrames}
+            startSec={10}
+            playbackRate={1.15}
           />
         </div>
       </AbsoluteFill>
     </AbsoluteFill>
   );
 };
+
+const DemoStrip: React.FC = () => (
+  <PatternStrip width={46} height="100%" opacity={0.4} />
+);
 
 const Caption: React.FC<{ text: string }> = ({ text }) => (
   <div
@@ -288,8 +374,10 @@ export const ClosingSegment: React.FC<{ lenFrames: number }> = ({
             gap: 44,
           }}
         >
+          <RevealBand width={560} height={26} delay={6} opacity={0.6} />
           <LogoReveal logoWidth={640} panelWidth={780} panelHeight={320} />
           <BumperText tagFrom={tagFromInBumper} />
+          <RevealBand width={560} height={26} delay={40} opacity={0.6} />
         </AbsoluteFill>
       </Sequence>
     </AbsoluteFill>
