@@ -13,18 +13,25 @@ import { SPRINGS, springAt } from "./motion";
  *  - exit: lifts, tilts away and fades in the final frames
  * Caller sizes it and provides the Sequence duration via useVideoConfig.
  */
+// A privacy redaction region in the RECORDING's native pixel coords (1320x2868).
+export type NativeBox = { x: number; y: number; w: number; h: number };
+
 export const PhoneMockup: React.FC<{
   width: number;
   src: string;
   lifeFrames: number; // how long this mockup is on screen (its Sequence length)
   startSec?: number; // trim the recording start
   playbackRate?: number;
-}> = ({ width, src, lifeFrames, startSec = 0, playbackRate = 1 }) => {
+  // Returns a box (in the recording's native pixels) to blur at a given
+  // recording time, or null. Used to hide the account number as it scrolls.
+  blurTrack?: (recSec: number) => NativeBox | null;
+}> = ({ width, src, lifeFrames, startSec = 0, playbackRate = 1, blurTrack }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const durationInFrames = lifeFrames;
 
   // recording is a portrait phone capture (1320x2868)
+  const NATIVE_W = 1320;
   const screenAspect = 2868 / 1320;
   const bezel = width * 0.028;
   const radius = width * 0.13;
@@ -107,6 +114,29 @@ export const PhoneMockup: React.FC<{
                 objectFit: "cover",
               }}
             />
+            {/* privacy blur — hides the account number as the recording scrolls */}
+            {(() => {
+              if (!blurTrack) return null;
+              const recSec = startSec + (frame / fps) * playbackRate;
+              const b = blurTrack(recSec);
+              if (!b) return null;
+              const f = screenW / NATIVE_W; // native px -> screen px (uniform)
+              return (
+                <div
+                  style={{
+                    position: "absolute",
+                    left: b.x * f,
+                    top: b.y * f,
+                    width: b.w * f,
+                    height: b.h * f,
+                    backdropFilter: "blur(10px)",
+                    WebkitBackdropFilter: "blur(10px)",
+                    background: "rgba(150,150,150,0.28)",
+                    borderRadius: 6 * f,
+                  }}
+                />
+              );
+            })()}
             {/* screen sheen */}
             <div
               style={{

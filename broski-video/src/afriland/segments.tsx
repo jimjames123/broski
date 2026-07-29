@@ -264,7 +264,8 @@ export const DemoSegment: React.FC<{ lenFrames: number }> = ({ lenFrames }) => {
             src={staticFile("afriland/screen_recording.mp4")}
             lifeFrames={lenFrames}
             startSec={10}
-            playbackRate={1.15}
+            playbackRate={1.05}
+            blurTrack={accountBlurTrack}
           />
         </div>
       </AbsoluteFill>
@@ -275,6 +276,19 @@ export const DemoSegment: React.FC<{ lenFrames: number }> = ({ lenFrames }) => {
 const DemoStrip: React.FC = () => (
   <PatternStrip width={46} height="100%" opacity={0.4} />
 );
+
+// Tracks the "PAY FROM" account number in the recording (native 1320x2868 px)
+// as it scrolls when the keyboard opens, so it can be blurred throughout.
+// Boxes are generous; during the scroll transition a taller band covers the
+// full travel. The demo window is trimmed to end before the summary screen.
+const ACC_X = 245;
+const ACC_W = 650;
+const accountBlurTrack = (t: number) => {
+  if (t < 15.45 || t > 28.9) return null; // number only visible in this range
+  if (t <= 16.9) return { x: ACC_X, y: 1000, w: ACC_W, h: 230 }; // form, pre-scroll
+  if (t <= 18.7) return { x: ACC_X, y: 470, w: ACC_W, h: 770 }; // scrolling: cover travel
+  return { x: ACC_X, y: 505, w: ACC_W, h: 265 }; // keyboard open, settled (drifts a bit)
+};
 
 const Caption: React.FC<{ text: string }> = ({ text }) => (
   <div
