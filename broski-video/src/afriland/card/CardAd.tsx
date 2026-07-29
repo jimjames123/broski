@@ -210,25 +210,71 @@ export const CardAd: React.FC = () => {
         </div>
       </div>
 
-      {/* Afriland logo bumper (small, bottom) */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 44,
-          left: 0,
-          right: 0,
-          display: "flex",
-          justifyContent: "center",
-          opacity: interpolate(frame, [200, 220], [0, 1], clamp),
-        }}
-      >
-        <div style={{ background: "#fff", borderRadius: 14, padding: "12px 26px" }}>
-          <Img src={staticFile("afriland/logo.png")} style={{ width: 300 }} />
-        </div>
-      </div>
+      {/* closing: blend into a white page carrying the logo */}
+      <WhiteClosing />
 
       <Audio src={staticFile("afriland/music.mp3")} volume={0.28} trimBefore={0} />
     </AbsoluteFill>
+  );
+};
+
+// Closing: a white disc grows out of the (white) card and blends the scene into
+// a clean white page carrying the Afriland logo + CTA.
+const WhiteClosing: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  if (frame < 258) return null;
+
+  const circle = interpolate(frame, [262, 292], [0, 1], clamp); // paced grow
+  const lock = interpolate(frame, [288, 296], [0, 1], clamp);
+  const contentO = interpolate(frame, [288, 300], [0, 1], clamp);
+  const logoP = springAt(frame, fps, 288, SPRINGS.entrance);
+  const ctaO = interpolate(frame, [304, 318], [0, 1], clamp);
+
+  return (
+    <>
+      <div
+        style={{
+          position: "absolute",
+          left: CX,
+          top: CY,
+          width: 2800,
+          height: 2800,
+          marginLeft: -1400,
+          marginTop: -1400,
+          borderRadius: "50%",
+          background: "#fff",
+          transform: `scale(${circle})`,
+        }}
+      />
+      <AbsoluteFill style={{ background: "#fff", opacity: lock }} />
+      <AbsoluteFill
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+          gap: 52,
+          opacity: contentO,
+        }}
+      >
+        <Img
+          src={staticFile("afriland/logo.png")}
+          style={{ width: 780, transform: `scale(${interpolate(logoP, [0, 1], [0.82, 1])})` }}
+        />
+        <div
+          style={{
+            opacity: ctaO,
+            fontFamily: FONTS.primary,
+            fontSize: 44,
+            fontWeight: 800,
+            color: COLORS.red,
+            letterSpacing: 0.5,
+          }}
+        >
+          Get your Mastercard today.
+        </div>
+      </AbsoluteFill>
+    </>
   );
 };
 
