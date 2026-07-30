@@ -5,6 +5,7 @@ import { AfrilandPromo } from "./afriland/AfrilandPromo";
 import { PlaceholderLogo } from "./afriland/PlaceholderLogo";
 import { CardAd } from "./afriland/card/CardAd";
 import { PoutePoster } from "./poster/PoutePoster";
+import { PoutePosterProduct } from "./poster/PoutePosterProduct";
 import { DURATION_FRAMES } from "./afriland/timing";
 
 export const RemotionRoot: React.FC = () => {
@@ -30,6 +31,14 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="PoutePoster"
         component={PoutePoster}
+        durationInFrames={1}
+        fps={30}
+        width={1600}
+        height={2000}
+      />
+      <Composition
+        id="PoutePosterProduct"
+        component={PoutePosterProduct}
         durationInFrames={1}
         fps={30}
         width={1600}
